@@ -46,7 +46,8 @@ while ($listener.IsListening) {
         if ($path -eq '/shutdown') {
             $response.StatusCode = 200
             $response.Close()
-            $shutdownTimer = New-Object System.Timers.Timer(2000)
+            # Increase timer to 10s to avoid race conditions on page refresh
+            $shutdownTimer = New-Object System.Timers.Timer(10000)
             $shutdownTimer.AutoReset = $false
             $action = { $listener.Stop() }
             Register-ObjectEvent -InputObject $shutdownTimer -EventName Elapsed -Action $action | Out-Null
@@ -84,7 +85,9 @@ while ($listener.IsListening) {
             $bytes = [System.Text.Encoding]::UTF8.GetBytes($json)
             $response.ContentType = 'application/json'
             $response.ContentLength64 = $bytes.Length
-            $response.OutputStream.Write($bytes, 0, $bytes.Length)
+            if ($request.HttpMethod -ne 'HEAD') {
+                $response.OutputStream.Write($bytes, 0, $bytes.Length)
+            }
             $response.Close()
             continue
         }
@@ -124,7 +127,9 @@ while ($listener.IsListening) {
             $bytes = [System.Text.Encoding]::UTF8.GetBytes($json)
             $response.ContentType = 'application/json'
             $response.ContentLength64 = $bytes.Length
-            $response.OutputStream.Write($bytes, 0, $bytes.Length)
+            if ($request.HttpMethod -ne 'HEAD') {
+                $response.OutputStream.Write($bytes, 0, $bytes.Length)
+            }
             $response.Close()
             continue
         }
@@ -165,7 +170,10 @@ while ($listener.IsListening) {
             $bytes = [System.Text.Encoding]::UTF8.GetBytes($json)
             $response.ContentType = 'application/json'
             $response.ContentLength64 = $bytes.Length
-            $response.OutputStream.Write($bytes, 0, $bytes.Length)
+            if ($request.HttpMethod -ne 'HEAD') {
+                $response.OutputStream.Write($bytes, 0, $bytes.Length)
+            }
+            $response.Close()
             continue
         }
 
@@ -203,7 +211,9 @@ while ($listener.IsListening) {
             $response.Headers.Add('Cache-Control', 'no-store, no-cache, must-revalidate')
             $response.Headers.Add('Pragma', 'no-cache')
             $response.ContentLength64 = $content.Length
-            $response.OutputStream.Write($content, 0, $content.Length)
+            if ($request.HttpMethod -ne 'HEAD') {
+                $response.OutputStream.Write($content, 0, $content.Length)
+            }
         } else {
             $response.StatusCode = 404
         }
