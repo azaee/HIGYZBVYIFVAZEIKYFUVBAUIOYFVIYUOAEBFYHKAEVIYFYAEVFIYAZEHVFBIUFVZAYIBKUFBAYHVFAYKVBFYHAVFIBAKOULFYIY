@@ -28,10 +28,8 @@ try {
 
 Write-Host '[+] Trinity Server is running...' -ForegroundColor Magenta
 
-$exeHBPath          = "$env:TEMP\trinity_alive.flag"
-$lastBrowserHB      = Get-Date
-$startTime          = Get-Date
-$browserConnected   = $false
+$lastBrowserHB    = Get-Date
+$browserConnected = $false
 
 while ($listener.IsListening) {
     try {
@@ -39,18 +37,6 @@ while ($listener.IsListening) {
         $task = $listener.GetContextAsync()
         while (-not $task.Wait(500)) {
             if (-not $listener.IsListening) { break }
-
-            # CMD closed: exe heartbeat file too old or missing
-            if (Test-Path $exeHBPath) {
-                $age = ((Get-Date) - (Get-Item $exeHBPath).LastWriteTime).TotalSeconds
-                if ($age -gt 3) {
-                    Write-Host "`n [!] Host process lost. Shutting down." -ForegroundColor Red
-                    $listener.Stop(); break
-                }
-            } elseif ((Get-Date) -gt $startTime.AddSeconds(5)) {
-                Write-Host "`n [!] Host process not found. Shutting down." -ForegroundColor Red
-                $listener.Stop(); break
-            }
 
             # Browser closed: only check after first heartbeat received
             if ($browserConnected -and ((Get-Date) - $lastBrowserHB).TotalSeconds -gt 6) {
