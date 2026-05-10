@@ -1,0 +1,2211 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permanent Spoof</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #08090a;
+            --surface: #0c0d0f;
+            --surface-2: #101113;
+            --surface-3: #16181b;
+            --line: rgba(255, 255, 255, 0.05);
+            --line-2: rgba(255, 255, 255, 0.08);
+            --line-3: rgba(255, 255, 255, 0.12);
+            --fg: #f5f5f7;
+            --fg-2: rgba(245, 245, 247, 0.62);
+            --fg-3: rgba(245, 245, 247, 0.38);
+            --fg-4: rgba(245, 245, 247, 0.22);
+            --green: #4ade80;
+            --blue: #7dd3fc;
+            --amber: #fcd34d;
+
+            --r-sm: 8px;
+            --r-md: 10px;
+            --r-lg: 14px;
+            --r-xl: 18px;
+        }
+
+        html,
+        body {
+            height: 100%;
+            background: var(--bg);
+            font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--fg);
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            letter-spacing: -0.011em;
+        }
+
+        body {
+            display: grid;
+            place-items: center;
+            background-color: #000;
+            position: relative;
+        }
+
+        /* ========== ANIMATED BACKGROUND ========== */
+        @keyframes move-background {
+            from {
+                transform: translate3d(0px, 0px, 0px);
+            }
+
+            to {
+                transform: translate3d(1000px, 0px, 0px);
+            }
+        }
+
+        @-webkit-keyframes move-background {
+            from {
+                -webkit-transform: translate3d(0px, 0px, 0px);
+            }
+
+            to {
+                -webkit-transform: translate3d(1000px, 0px, 0px);
+            }
+        }
+
+        @-moz-keyframes move-background {
+            from {
+                -moz-transform: translate3d(0px, 0px, 0px);
+            }
+
+            to {
+                -moz-transform: translate3d(1000px, 0px, 0px);
+            }
+        }
+
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            z-index: 0;
+        }
+
+        .stars {
+            background: black url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/stars.png) repeat;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: block;
+            z-index: 0;
+        }
+
+        .twinkling {
+            width: 10000px;
+            height: 100%;
+            background: transparent url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/twinkling.png") repeat;
+            background-size: 1000px 1000px;
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 2;
+            -moz-animation: move-background 70s linear infinite;
+            -ms-animation: move-background 70s linear infinite;
+            -o-animation: move-background 70s linear infinite;
+            -webkit-animation: move-background 70s linear infinite;
+            animation: move-background 70s linear infinite;
+        }
+
+        .clouds {
+            width: 10000px;
+            height: 100%;
+            background: transparent url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/clouds_repeat.png") repeat;
+            background-size: 1000px 1000px;
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 3;
+            -moz-animation: move-background 150s linear infinite;
+            -ms-animation: move-background 150s linear infinite;
+            -o-animation: move-background 150s linear infinite;
+            -webkit-animation: move-background 150s linear infinite;
+            animation: move-background 150s linear infinite;
+        }
+
+        .background-container img {
+            height: 70vh;
+            width: 70vh;
+            position: absolute;
+            z-index: 3;
+            right: 20px;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            opacity: 0.5;
+            z-index: 4;
+            mix-blend-mode: overlay;
+        }
+
+        .app {
+            width: min(1080px, 94vw);
+            height: min(620px, 92vh);
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--r-xl);
+            display: flex;
+            overflow: hidden;
+            position: relative;
+            z-index: 10;
+            box-shadow:
+                0 0 0 1px rgba(255, 255, 255, 0.015) inset,
+                0 1px 0 rgba(255, 255, 255, 0.04) inset,
+                0 40px 80px -30px rgba(0, 0, 0, 0.7),
+                0 12px 24px -8px rgba(0, 0, 0, 0.5);
+            animation: rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.995);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* ========== SIDEBAR ========== */
+        .sidebar {
+            width: 64px;
+            border-right: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px 0;
+            gap: 4px;
+        }
+
+        .brand {
+            width: 34px;
+            height: 34px;
+            margin-bottom: 14px;
+            border-radius: var(--r-sm);
+            object-fit: contain;
+            display: block;
+        }
+
+        .nav-divider {
+            width: 24px;
+            height: 1px;
+            background: var(--line);
+            margin: 4px 0 8px;
+        }
+
+        .nav-btn {
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: var(--r-md);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            color: var(--fg-3);
+            transition: color 0.2s ease, background 0.2s ease;
+            position: relative;
+        }
+
+        .nav-btn::before {
+            content: attr(data-tip);
+            position: absolute;
+            left: calc(100% + 14px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--surface-3);
+            border: 1px solid var(--line-2);
+            color: var(--fg);
+            font-size: 11px;
+            font-weight: 500;
+            padding: 5px 9px;
+            border-radius: 6px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.18s ease, transform 0.18s ease;
+            z-index: 10;
+        }
+
+        .nav-btn:hover {
+            color: var(--fg);
+            background: var(--surface-2);
+        }
+
+        /* ========== TOOLTIPS ========== */
+        [data-desc] {
+            position: relative;
+        }
+
+        [data-desc]::after {
+            content: attr(data-desc);
+            position: absolute;
+            bottom: calc(100% + 12px);
+            left: 50%;
+            transform: translateX(-50%) translateY(4px);
+            background: var(--surface-3);
+            border: 1px solid var(--line-2);
+            color: var(--fg-2);
+            font-size: 11px;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 8px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        [data-desc]:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .nav-btn.active {
+            color: #08090a;
+            background: var(--fg);
+        }
+
+        .nav-btn.active::after {
+            content: '';
+            position: absolute;
+            left: -16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 16px;
+            background: var(--fg);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .nav-btn svg {
+            width: 17px;
+            height: 17px;
+            stroke-width: 1.6;
+        }
+
+        .nav-spacer {
+            flex: 1;
+        }
+
+        /* ========== MAIN ========== */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 32px 36px 28px;
+            min-width: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        .crumbs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--fg-3);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .crumbs span:not(:last-child)::after {
+            content: '/';
+            margin-left: 8px;
+            color: var(--fg-4);
+        }
+
+        .crumbs span:last-child {
+            color: var(--fg-2);
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+            line-height: 1.15;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--fg-2);
+            font-weight: 400;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 5px 10px 5px 8px;
+            background: var(--surface-2);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--fg-2);
+            flex-shrink: 0;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.12);
+            animation: pulse 2.4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.55;
+            }
+        }
+
+        /* ========== LOGS ========== */
+        .logs-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 0;
+        }
+
+        .logs-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2px;
+        }
+
+        .logs-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--fg-3);
+        }
+
+        .logs-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            color: var(--fg-4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logs-meta .sep {
+            width: 1px;
+            height: 10px;
+            background: var(--line-2);
+        }
+
+        .logs-box {
+            flex: 1;
+            background: var(--surface-2);
+            border: 1px solid var(--line);
+            border-radius: var(--r-lg);
+            padding: 16px 4px 16px 18px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .logs-box::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 36px;
+            background: linear-gradient(transparent, var(--surface-2));
+            pointer-events: none;
+            border-radius: 0 0 var(--r-lg) var(--r-lg);
+        }
+
+        .logs-scroll {
+            height: 100%;
+            overflow-y: auto;
+            padding-right: 14px;
+            scroll-behavior: smooth;
+        }
+
+        .logs-scroll::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .logs-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .logs-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 2px;
+        }
+
+        .logs-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .empty {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--fg-4);
+        }
+
+        .empty-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--surface-3);
+            border: 1px solid var(--line);
+            display: grid;
+            place-items: center;
+            color: var(--fg-3);
+        }
+
+        .empty-icon svg {
+            width: 16px;
+            height: 16px;
+            stroke-width: 1.6;
+        }
+
+        .empty-text {
+            font-size: 12px;
+            font-weight: 400;
+        }
+
+        .log {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            line-height: 1.7;
+            display: grid;
+            grid-template-columns: 56px 64px 1fr;
+            gap: 14px;
+            align-items: baseline;
+            opacity: 0;
+            transform: translateY(3px);
+            animation: logIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            padding: 1px 0;
+        }
+
+        @keyframes logIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .log-time {
+            color: var(--fg-4);
+            font-size: 10.5px;
+        }
+
+        .log-tag {
+            font-size: 9.5px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .log-tag::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .log[data-type="info"] .log-tag {
+            color: var(--blue);
+        }
+
+        .log[data-type="info"] .log-tag::before {
+            background: var(--blue);
+            box-shadow: 0 0 6px rgba(125, 211, 252, 0.5);
+        }
+
+        .log[data-type="ok"] .log-tag {
+            color: var(--green);
+        }
+
+        .log[data-type="ok"] .log-tag::before {
+            background: var(--green);
+            box-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+        }
+
+        .log[data-type="warn"] .log-tag {
+            color: var(--amber);
+        }
+
+        .log[data-type="warn"] .log-tag::before {
+            background: var(--amber);
+            box-shadow: 0 0 6px rgba(252, 211, 77, 0.5);
+        }
+
+        .log-msg {
+            color: var(--fg-2);
+        }
+
+        .log-msg b {
+            color: var(--fg);
+            font-weight: 500;
+        }
+
+        .log-msg code {
+            font-family: inherit;
+            color: var(--fg);
+            background: var(--surface-3);
+            padding: 1px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--line);
+            font-size: 10.5px;
+        }
+
+        /* ========== ACTION BAR ========== */
+        .action-bar {
+            margin-top: 18px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            height: 48px;
+            background: var(--fg);
+            color: #08090a;
+            border: none;
+            border-radius: var(--r-lg);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease;
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.5) inset,
+                0 -1px 0 rgba(0, 0, 0, 0.08) inset,
+                0 6px 16px -6px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.5) inset,
+                0 -1px 0 rgba(0, 0, 0, 0.08) inset,
+                0 10px 24px -6px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            cursor: progress;
+            opacity: 0.95;
+        }
+
+        .btn-primary svg {
+            width: 14px;
+            height: 14px;
+            stroke-width: 2;
+        }
+
+        .shimmer {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%);
+            transform: translateX(-100%);
+            pointer-events: none;
+            clip-path: inset(0 round var(--r-lg));
+            will-change: transform;
+        }
+
+        .btn-primary.loading .shimmer {
+            animation: shimmer 1.4s linear infinite;
+        }
+
+        @keyframes shimmer {
+            to {
+                transform: translateX(100%);
+            }
+        }
+
+        .btn-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--surface-2);
+            border: 1px solid var(--line);
+            color: var(--fg-2);
+            border-radius: var(--r-lg);
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .btn-icon:hover {
+            background: var(--surface-3);
+            color: var(--fg);
+            border-color: var(--line-2);
+        }
+
+        .btn-icon:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-icon svg {
+            width: 15px;
+            height: 15px;
+            stroke-width: 1.6;
+        }
+
+        .progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 1px;
+            background: var(--green);
+            width: 0;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
+        }
+
+        /* ========== TABS ========== */
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            animation: tabIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        @keyframes tabIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tab-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .btn-stack {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+            overflow: hidden;
+            padding-bottom: 4px;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            height: 44px;
+            background: var(--surface-2);
+            border: 1px solid var(--line);
+            color: var(--fg-2);
+            border-radius: var(--r-md);
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-3);
+            color: var(--fg);
+            border-color: var(--line-3);
+            transform: translateX(4px);
+        }
+
+        .btn-secondary svg {
+            width: 16px;
+            height: 16px;
+            opacity: 0.6;
+        }
+
+        /* ========== OVERLAY ========== */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.96);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .overlay-content {
+            text-align: center;
+        }
+
+        .overlay-content h2 {
+            color: #ff4444;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ========== DRIVE CARD ========== */
+        .drive-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 14px;
+            background: var(--surface-2);
+            border: 1px solid var(--line);
+            border-radius: var(--r-md);
+            cursor: pointer;
+            transition: all 0.18s ease;
+            user-select: none;
+        }
+
+        .drive-card:hover {
+            border-color: var(--line-3);
+            background: var(--surface-3);
+        }
+
+        .drive-card.selected {
+            border-color: rgba(125, 211, 252, 0.5);
+            background: rgba(125, 211, 252, 0.05);
+        }
+
+        .drive-letter {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--surface-3);
+            border: 1px solid var(--line-2);
+            display: grid;
+            place-items: center;
+            color: var(--fg-3);
+            flex-shrink: 0;
+        }
+
+        .drive-letter svg {
+            width: 16px;
+            height: 16px;
+            stroke-width: 1.6;
+        }
+
+        .drive-card.selected .drive-letter {
+            background: rgba(125, 211, 252, 0.1);
+            border-color: rgba(125, 211, 252, 0.3);
+            color: var(--blue);
+        }
+
+        .drive-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .drive-name {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--fg);
+        }
+
+        .drive-meta {
+            font-size: 11px;
+            color: var(--fg-4);
+            margin-top: 2px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .drive-type-badge {
+            font-size: 9.5px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 3px 7px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .badge-removable {
+            background: rgba(74, 222, 128, 0.1);
+            color: var(--green);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+        }
+
+        .badge-local {
+            background: rgba(125, 211, 252, 0.1);
+            color: var(--blue);
+            border: 1px solid rgba(125, 211, 252, 0.2);
+        }
+
+        .badge-other {
+            background: var(--surface-3);
+            color: var(--fg-3);
+            border: 1px solid var(--line);
+        }
+
+        /* ========== SECURE BOOT MODAL ========== */
+        #sb-modal,
+        #drive-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(14px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .sb-card {
+            width: min(480px, 90vw);
+            background: var(--surface);
+            border: 1px solid rgba(252, 211, 77, 0.2);
+            border-radius: var(--r-xl);
+            padding: 28px 30px 24px;
+            box-shadow:
+                0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+                0 40px 80px -20px rgba(0, 0, 0, 0.8),
+                0 0 60px -20px rgba(252, 211, 77, 0.08);
+            animation: cardUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @keyframes cardUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .sb-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .sb-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: rgba(252, 211, 77, 0.1);
+            border: 1px solid rgba(252, 211, 77, 0.2);
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            font-size: 18px;
+        }
+
+        .sb-title {
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--fg);
+        }
+
+        .sb-subtitle {
+            font-size: 11.5px;
+            color: var(--fg-3);
+            margin-top: 2px;
+        }
+
+        .sb-desc {
+            font-size: 12px;
+            color: var(--fg-3);
+            line-height: 1.65;
+            padding: 12px 14px;
+            background: var(--surface-2);
+            border: 1px solid var(--line);
+            border-radius: var(--r-md);
+            margin-bottom: 20px;
+        }
+
+        .sb-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 22px;
+        }
+
+        .sb-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 11px 14px;
+            background: var(--surface-2);
+            border: 1px solid var(--line);
+            border-radius: var(--r-md);
+            transition: border-color 0.2s;
+        }
+
+        .sb-step:hover {
+            border-color: var(--line-2);
+        }
+
+        .sb-num {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(252, 211, 77, 0.12);
+            border: 1px solid rgba(252, 211, 77, 0.25);
+            color: var(--amber);
+            font-size: 10px;
+            font-weight: 700;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .sb-step-text {
+            font-size: 12px;
+            color: var(--fg-2);
+            line-height: 1.55;
+        }
+
+        .sb-step-text code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            color: var(--amber);
+            background: rgba(252, 211, 77, 0.08);
+            padding: 1px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(252, 211, 77, 0.15);
+        }
+
+        .sb-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .sb-note {
+            font-size: 11px;
+            color: var(--fg-4);
+            flex: 1;
+        }
+
+        .sb-note b {
+            color: var(--green);
+            font-weight: 500;
+        }
+
+        .sb-close {
+            height: 36px;
+            padding: 0 18px;
+            background: rgba(252, 211, 77, 0.1);
+            border: 1px solid rgba(252, 211, 77, 0.2);
+            color: var(--amber);
+            border-radius: var(--r-md);
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .sb-close:hover {
+            background: rgba(252, 211, 77, 0.16);
+            border-color: rgba(252, 211, 77, 0.35);
+        }
+
+        /* ========== TOASTS ========== */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 100000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+
+        .toast {
+            width: 320px;
+            background: rgba(20, 20, 25, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--r-lg);
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
+            animation: toastIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .toast.hide {
+            opacity: 0;
+            transform: scale(0.9) translateY(-10px);
+            pointer-events: none;
+        }
+
+        .toast-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--fg);
+        }
+
+        .toast-msg {
+            font-size: 11px;
+            color: var(--fg-3);
+            margin-top: 2px;
+        }
+
+        .toast-success .toast-icon {
+            background: rgba(74, 222, 128, 0.1);
+            color: var(--green);
+            border: 1px solid rgba(74, 222, 128, 0.15);
+        }
+
+        .toast-error .toast-icon {
+            background: rgba(255, 80, 80, 0.1);
+            color: #ff5050;
+            border: 1px solid rgba(255, 80, 80, 0.15);
+        }
+
+        .toast-info .toast-icon {
+            background: rgba(125, 211, 252, 0.1);
+            color: var(--blue);
+            border: 1px solid rgba(125, 211, 252, 0.15);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-container">
+        <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/moon2.png" alt="">
+        <div class="stars"></div>
+        <div class="twinkling"></div>
+        <div class="clouds"></div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- DRIVE PICKER MODAL -->
+    <div id="drive-modal" class="hidden">
+        <div class="sb-card" style="width:min(520px,92vw)">
+            <div class="sb-header">
+                <div class="sb-icon">💾</div>
+                <div>
+                    <div class="sb-title">Sélectionne le disque cible</div>
+                    <div class="sb-subtitle">Les fichiers EFI seront copiés sur ce disque</div>
+                </div>
+            </div>
+
+            <div id="drive-list"
+                style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px;max-height:260px;overflow-y:auto;padding-right:4px;">
+                <div
+                    style="display:flex;align-items:center;justify-content:center;height:80px;color:var(--fg-4);font-size:12px;gap:10px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        style="animation:spin 1s linear infinite">
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    </svg>
+                    Scanning drives...
+                </div>
+            </div>
+
+            <div class="sb-footer">
+                <div class="sb-note" id="drive-selected-note">Aucun disque sélectionné.</div>
+                <div style="display:flex;gap:8px;">
+                    <button class="sb-close"
+                        style="background:transparent;color:var(--fg-3);border-color:var(--line-2);"
+                        onclick="closeDriveModal()">Annuler</button>
+                    <button class="sb-close" id="drive-confirm-btn" disabled onclick="confirmDrive()"
+                        style="opacity:0.4;cursor:not-allowed;">Confirmer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECURE BOOT ENROLLMENT GUIDE -->
+    <div id="sb-modal" class="hidden">
+        <div class="sb-card">
+            <div class="sb-header">
+                <div class="sb-icon">🔐</div>
+                <div>
+                    <div class="sb-title">Secure Boot — Configuration requise</div>
+                    <div class="sb-subtitle">Action unique · 30 secondes dans le BIOS</div>
+                </div>
+            </div>
+
+            <div class="sb-desc">
+                Le certificat TRINITY n'a pas pu être enrollé automatiquement. Ton firmware est en <b
+                    style="color:var(--fg)">User Mode</b> — tu dois l'ajouter manuellement une seule fois dans le BIOS.
+                Après ça, le Locked Spoof fonctionnera automatiquement à chaque utilisation.
+            </div>
+
+            <div class="sb-steps">
+                <div class="sb-step">
+                    <div class="sb-num">1</div>
+                    <div class="sb-step-text">Redémarre et entre dans le <b style="color:var(--fg)">BIOS</b>
+                        (<code>DEL</code> ou <code>F2</code> au démarrage)</div>
+                </div>
+                <div class="sb-step">
+                    <div class="sb-num">2</div>
+                    <div class="sb-step-text">Va dans <code>Secure Boot</code> → <code>Key Management</code> →
+                        <code>Authorized Signatures (db)</code>
+                    </div>
+                </div>
+                <div class="sb-step">
+                    <div class="sb-num">3</div>
+                    <div class="sb-step-text">Choisis <code>Append from File</code> → navigue vers
+                        <code>EFI \ Boot \</code> → sélectionne <code>94221640...der</code>
+                    </div>
+                </div>
+                <div class="sb-step">
+                    <div class="sb-num">4</div>
+                    <div class="sb-step-text"><code>Save &amp; Exit</code> — le PC va redémarrer et le shell UEFI va se
+                        lancer automatiquement</div>
+                </div>
+            </div>
+
+            <div class="sb-footer">
+                <div class="sb-note">À faire <b>une seule fois</b> — le cert reste en firmware de façon permanente.
+                </div>
+                <button class="sb-close"
+                    onclick="document.getElementById('sb-modal').classList.add('hidden')">Compris</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="overlay" class="hidden">
+        <div class="overlay-content">
+            <h2>⚠️ TERMINAL FERMÉ</h2>
+            <p style="color: rgba(255,255,255,0.4)">La session as été interrompue.</p>
+        </div>
+    </div>
+
+    <div class="app">
+        <nav class="sidebar">
+            <img src="https://raw.githubusercontent.com/azaee/HIGYZBVYIFVAZEIKYFUVBAUIOYFVIYUOAEBFYHKAEVIYFYAEVFIYAZEHVFBIUFVZAYIBKUFBAYHVFAYKVBFYHAVFIBAKOULFYIY/main/Logo-White.png"
+                class="brand" alt="Trinity Logo">
+            <div class="nav-divider"></div>
+
+            <button class="nav-btn" data-tip="Dashboard" onclick="switchTab('dashboard', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                    <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                    <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                    <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                </svg>
+            </button>
+
+            <button class="nav-btn active" data-tip="Spoof" onclick="switchTab('spoof', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path
+                        d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+                    <path
+                        d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+                    <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+                    <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+                </svg>
+            </button>
+
+            <button class="nav-btn" data-tip="Additional" onclick="switchTab('additional', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                </svg>
+            </button>
+
+
+
+            <button class="nav-btn" data-tip="Settings" onclick="switchTab('settings', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <rect x="4" y="4" width="16" height="16" rx="2" />
+                    <rect x="9" y="9" width="6" height="6" />
+                    <path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2" />
+                </svg>
+            </button>
+
+
+            <div class="nav-spacer"></div>
+
+            <button class="nav-btn" data-tip="Sign out" onclick="window.close()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+            </button>
+        </nav>
+
+        <main class="main">
+            <div class="progress" id="progress"></div>
+
+            <!-- DASHBOARD TAB -->
+            <div id="tab-dashboard" class="tab-content">
+                <header class="header">
+                    <div>
+                        <div class="crumbs"><span>Tools</span><span>Dashboard</span></div>
+                        <h1>Hardware Telemetry</h1>
+                        <p class="subtitle">Comprehensive system identifiers and security status.</p>
+                    </div>
+                    <div style="display:flex;gap:12px; align-items:center;">
+                        <button class="btn-primary" style="height:40px; padding:0 14px; font-size:12px; gap:8px;"
+                            onclick="saveSerials()" id="save-serials-btn" disabled>
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                <polyline points="7 3 7 8 15 8"></polyline>
+                            </svg>
+                            Save Serials
+                        </button>
+                    </div>
+                </header>
+
+                <div class="tab-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;"
+                    id="hw-grid">
+                    <!-- Cards will be populated dynamically -->
+                    <div
+                        style="grid-column: 1 / -1; display:flex; align-items:center; justify-content:center; height:200px; color:var(--fg-4);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" style="animation:spin 1s linear infinite; margin-right:12px;">
+                            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                        </svg>
+                        Gathering WMI telemetry...
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- SPOOF TAB -->
+            <div id="tab-spoof" class="tab-content active">
+                <header class="header">
+                    <div>
+                        <div class="crumbs">
+                            <span>Tools</span>
+                            <span>Spoofing Center</span>
+                        </div>
+                        <h1>Hardware Spoofing</h1>
+                        <p class="subtitle">Select your preferred spoofing method.</p>
+                    </div>
+                    <div class="pill">
+                        <span class="dot"></span>
+                        <span>Ready</span>
+                    </div>
+                </header>
+
+                <div class="tab-grid">
+                    <section class="logs-wrap" style="margin:0; flex: 1;">
+                        <div class="logs-head">
+                            <span class="logs-label">Spoofing Logs</span>
+                            <div class="logs-meta">
+                                <span id="logCount">0 entries</span>
+                                <span class="sep"></span>
+                                <span id="logStatus">idle</span>
+                            </div>
+                        </div>
+
+                        <div class="logs-box">
+                            <div class="logs-scroll" id="logs">
+                                <div class="empty" id="empty">
+                                    <div class="empty-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                            <polyline points="14 2 14 8 20 8" />
+                                        </svg>
+                                    </div>
+                                    <span class="empty-text">Select a method to begin</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="btn-stack" style="width: 100%;">
+                        <button class="btn-primary" onclick="runSpoof('permanent')" style="flex: 1;"
+                            data-desc="Permanently modify hardware serials in the BIOS and Disk for maximum persistence.">
+                            <span class="shimmer"></span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                            Permanent Spoof
+                        </button>
+
+                        <button class="btn-icon" id="clearBtn" title="Clear logs">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6" />
+                                <path
+                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- SETTINGS TAB -->
+            <div id="tab-settings" class="tab-content">
+                <header class="header">
+                    <div>
+                        <div class="crumbs"><span>Tools</span><span>Settings</span></div>
+                        <h1>General Settings</h1>
+                        <p class="subtitle">Manage and restore your system state.</p>
+                    </div>
+                </header>
+
+                <div class="tab-grid">
+                    <div class="logs-box">
+                        <div class="logs-scroll" id="reset-logs">
+                            <div class="empty">
+                                <div class="empty-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                        <polyline points="14 2 14 8 20 8" />
+                                    </svg>
+                                </div>
+                                <span class="empty-text">No activity yet</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div
+                            style="padding:14px 16px; background:var(--surface-2); border:1px solid rgba(255,80,80,0.12); border-radius:var(--r-lg);">
+                            <p
+                                style="font-size:11px; color:rgba(255,100,100,0.8); font-weight:600; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:6px;">
+                                ⚠ Danger Zone</p>
+                            <p style="font-size:12px; color:var(--fg-3); line-height:1.6;">This will remove the TRINITY
+                                driver, clean the EFI partition and restore your original BIOS serials from backup.
+                                Requires a reboot to take effect.</p>
+                        </div>
+                        <button onclick="runSpoof('reset')" style="
+                            height:48px;
+                            background: rgba(255,60,60,0.08);
+                            color: rgba(255,100,100,0.9);
+                            border: 1px solid rgba(255,60,60,0.2);
+                            border-radius: var(--r-lg);
+                            font-family: inherit;
+                            font-size: 13px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 10px;
+                            transition: all 0.2s ease;
+                            position: relative;
+                            overflow: hidden;
+                        " onmouseover="this.style.background='rgba(255,60,60,0.14)'; this.style.borderColor='rgba(255,60,60,0.35)'"
+                            onmouseout="this.style.background='rgba(255,60,60,0.08)'; this.style.borderColor='rgba(255,60,60,0.2)'"
+                            id="resetBtn">
+                            <span class="shimmer"></span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15"
+                                height="15">
+                                <polyline points="1 4 1 10 7 10" />
+                                <path d="M3.51 15a9 9 0 1 0 .49-3.67" />
+                            </svg>
+                            Reset All Spoofs
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADDITIONAL TAB -->
+            <div id="tab-additional" class="tab-content">
+                <header class="header">
+                    <div>
+                        <div class="crumbs"><span>Tools</span><span>Additional</span></div>
+                        <h1>Additional Features</h1>
+                        <p class="subtitle">Supplementary tools and experimental modules.</p>
+                    </div>
+                </header>
+
+                <div class="tab-grid">
+                    <div class="logs-box">
+                        <div class="logs-scroll" id="extra-logs">
+                            <div class="empty">
+                                <span class="empty-text">Console ready — waiting for input</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="display: flex; gap: 12px; width: 100%;">
+                            <button class="btn-primary" onclick="runSpoof('driverless')" style="flex: 1;"
+                                data-desc="Spoof serials without installing third-party kernel drivers.">
+                                <span class="shimmer"></span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                </svg>
+                                Driverless Spoof
+                            </button>
+                            <button class="btn-primary" onclick="runSpoof('tpm_driverless')" style="flex: 1;"
+                                data-desc="Bypass TPM restrictions using hardware emulation techniques.">
+                                <span class="shimmer"></span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                    <path d="M7 11V7a5 5 0 0110 0v4" />
+                                </svg>
+                                TPM Driverless
+                            </button>
+
+                        </div>
+                        <button class="btn-primary" onclick="runSpoof('temp')" style="width: 100%;"
+                            data-desc="Temporary session-based spoofing (resets after reboot).">
+                            <span class="shimmer"></span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                            </svg>
+                            Temp Spoof
+                        </button>
+                        <button class="btn-primary" onclick="runSpoof('locked')" style="width: 100%;"
+                            data-desc="Force-lock hardware identifiers to stay static and hidden.">
+                            <span class="shimmer"></span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0110 0v4" />
+                            </svg>
+                            Locked Spoof
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        function switchTab(tabId, el) {
+            // Buttons
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+
+            // Content
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+
+        const logs = document.getElementById('logs');
+        const empty = document.getElementById('empty');
+        const clearBtn = document.getElementById('clearBtn');
+        const logCount = document.getElementById('logCount');
+        const logStatus = document.getElementById('logStatus');
+        const progress = document.getElementById('progress');
+
+        const sequence = [
+            { type: 'info', msg: 'Initializing <b>spoof engine</b>', delay: 320 },
+            { type: 'info', msg: 'Scanning hardware identifiers', delay: 480 },
+            { type: 'ok', msg: 'BIOS serial detected <code>SN-A91F2C</code>', delay: 560 },
+            { type: 'ok', msg: 'Disk identifiers mapped', delay: 520 },
+            { type: 'info', msg: 'Generating legit serial pool', delay: 640 },
+            { type: 'ok', msg: 'MAC address randomized', delay: 480 },
+            { type: 'ok', msg: 'BIOS serial regenerated', delay: 560 },
+            { type: 'ok', msg: 'Disk serial spoofed', delay: 480 },
+            { type: 'warn', msg: 'Applying registry patches', delay: 660 },
+            { type: 'ok', msg: 'Persistence layer written', delay: 560 },
+            { type: 'ok', msg: '<b>Spoof completed</b> — system clean', delay: 480 },
+        ];
+
+        let running = false;
+        let entries = 0;
+
+        const ts = () => {
+            const d = new Date();
+            return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+        };
+
+        const tagText = t => t === 'info' ? 'Info' : t === 'ok' ? 'Success' : 'Apply';
+
+        function showToast(title, msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = `toast toast-${type}`;
+
+            const icons = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️'
+            };
+
+            el.innerHTML = `
+                <div class="toast-icon">${icons[type]}</div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-msg">${msg}</div>
+                </div>
+            `;
+
+            container.appendChild(el);
+
+            setTimeout(() => {
+                el.classList.add('hide');
+                setTimeout(() => el.remove(), 500);
+            }, 5000);
+        }
+
+        function addLog({ type, msg }, syncCMD = true, target = 'spoof') {
+            const activeLogs = target === 'reset'
+                ? document.querySelector('#reset-logs')
+                : (target === 'extra' ? document.querySelector('#extra-logs') : document.querySelector('#tab-spoof #logs'));
+            const activeEmpty = target === 'reset'
+                ? document.querySelector('#reset-logs .empty')
+                : (target === 'extra' ? document.querySelector('#extra-logs .empty') : document.querySelector('#tab-spoof #empty'));
+
+            if (activeEmpty && activeEmpty.parentNode) activeEmpty.remove();
+
+            const el = document.createElement('div');
+            el.className = 'log';
+            el.dataset.type = type;
+            el.innerHTML = `
+                <span class="log-time">${ts()}</span>
+                <span class="log-tag">${tagText(type)}</span>
+                <span class="log-msg">${msg}</span>
+            `;
+            activeLogs.appendChild(el);
+            activeLogs.scrollTop = activeLogs.scrollHeight;
+            entries++;
+            logCount.textContent = `${entries} ${entries === 1 ? 'entry' : 'entries'}`;
+
+            // Show toasts for important logs
+            if (type === 'err' || type === 'warn') {
+                showToast(type === 'err' ? 'Error Detected' : 'Warning', msg, type === 'err' ? 'error' : 'info');
+            } else if (msg.includes('completed') || msg.includes('finished') || msg.includes('ready')) {
+                showToast('Success', msg, 'success');
+            }
+
+            // Only sync to CMD for browser-initiated logs, not for logs coming from CMD
+            if (syncCMD) fetch(`/log?type=${type}&msg=${encodeURIComponent(msg)}`).catch(() => { });
+        }
+
+        let spoofPollInterval = null;
+
+        window._currentLogTarget = 'spoof';
+
+        function startLogPolling() {
+            if (spoofPollInterval) return;
+            spoofPollInterval = true; // flag to indicate polling is active
+
+            const poll = async () => {
+                if (!spoofPollInterval) return;
+                try {
+                    const r = await fetch('/spoof/logs');
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    const entries = await r.json();
+                    entries.forEach(e => {
+                        addLog(
+                            { type: e.type === 'err' ? 'warn' : e.type, msg: e.msg },
+                            false,
+                            window._currentLogTarget
+                        );
+                        if (e.msg && e.msg.toLowerCase().includes('auto-enrollment failed')) {
+                            setTimeout(() => {
+                                document.getElementById('sb-modal').classList.remove('hidden');
+                            }, 800);
+                        }
+                    });
+                } catch (e) {
+                    // Polling error (silent)
+                }
+                // Schedule next poll only after current one finished (avoids overlapping/hanging)
+                if (spoofPollInterval) setTimeout(poll, 500);
+            };
+            poll();
+        }
+
+        function stopLogPolling() {
+            spoofPollInterval = false;
+        }
+
+        async function runSpoof(method) {
+            if (running) return;
+            running = true;
+
+            const stackButtons = document.querySelectorAll('#tab-spoof .btn-primary, #tab-additional .btn-primary, #tab-settings button');
+            stackButtons.forEach(b => { b.disabled = true; b.classList.add('loading'); });
+            clearBtn.disabled = true;
+            logStatus.textContent = 'running';
+            progress.style.width = '0%';
+
+            const realMethods = ['permanent', 'tpm_driverless', 'driverless', 'locked', 'reset', 'temp'];
+
+            const isReset = method === 'reset';
+
+            // Forced redirection to Spoof tab (except for reset)
+            if (!isReset) {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                const spoofBtn = document.querySelector('.nav-btn[onclick*="spoof"]') || document.querySelector('.nav-btn[data-tip="Spoof"]');
+                if (spoofBtn) spoofBtn.classList.add('active');
+
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById('tab-spoof').classList.add('active');
+            }
+
+            if (realMethods.includes(method)) {
+
+
+
+                let drive = '';
+                // For locked spoof: show drive picker first
+                if (method === 'locked') {
+                    drive = await openDrivePicker();
+                    if (!drive) {
+                        stackButtons.forEach(b => { b.classList.remove('loading'); b.disabled = false; });
+                        clearBtn.disabled = false;
+                        logStatus.textContent = 'idle';
+                        running = false;
+                        return;
+                    }
+                }
+
+                // Fire the request and verify it worked
+                try {
+                    const url = method === 'locked' ? `/spoof/locked?drive=${encodeURIComponent(drive)}` : `/spoof/${method}`;
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                } catch (e) {
+                    addLog({ type: 'err', msg: 'Failed to send request: ' + e.message }, false);
+                    stackButtons.forEach(b => { b.classList.remove('loading'); b.disabled = false; });
+                    clearBtn.disabled = false;
+                    logStatus.textContent = 'idle';
+                    running = false;
+                    return;
+                }
+
+                // Determine where logs should go based on current tab
+                const activeTabId = document.querySelector('.tab-content.active').id;
+                const pollTarget = isReset ? 'reset' : (activeTabId === 'tab-additional' ? 'extra' : 'spoof');
+                window._currentLogTarget = pollTarget;
+
+                startLogPolling();
+
+                // Poll until final message or 10 min hard cap
+                const doneKeywords = [
+                    'apply the changes', 'installation incomplete',
+                    'write failed', 'reset complete', 'download failed',
+                    'spoof failed', 'operation failed', 'take effect', 'restart your pc',
+                    'already running', 'operation aborted', 'no drive selected',
+                    'spoof completed', 'success'
+                ];
+                const logSelector = isReset ? '#reset-logs .log' : (window._currentLogTarget === 'extra' ? '#extra-logs .log' : '#tab-spoof #logs .log');
+                const hardCap = Date.now() + 120000; // 2 min safety timeout
+
+                await new Promise(resolve => {
+                    const check = setInterval(() => {
+                        const allLogs = document.querySelectorAll(logSelector);
+                        if (allLogs.length > 0) {
+                            // Check last 3 logs for any completion keyword
+                            const recentLogs = Array.from(allLogs).slice(-3);
+                            const found = recentLogs.some(log => {
+                                const text = log.querySelector('.log-msg')?.textContent?.toLowerCase() || '';
+                                return doneKeywords.some(k => text.includes(k));
+                            });
+
+                            if (found) {
+                                clearInterval(check);
+                                setTimeout(resolve, 800);
+                                return;
+                            }
+                        }
+                        if (Date.now() > hardCap) { clearInterval(check); resolve(); }
+                    }, 400);
+                });
+
+                stopLogPolling();
+                window._currentLogTarget = 'spoof';
+                progress.style.width = '100%';
+            } else {
+                const methodNames = {
+                    'temp': 'Temp Spoof'
+                };
+
+                const logs_to_use = [
+                    { type: 'info', msg: `Initializing <b>${methodNames[method]}</b> engine`, delay: 320 },
+                    { type: 'info', msg: 'Scanning hardware identifiers', delay: 480 },
+                    { type: 'ok', msg: 'Hardware signature captured', delay: 560 },
+                    { type: 'info', msg: 'Generating new identity pool', delay: 640 },
+                    { type: 'ok', msg: 'Serial numbers regenerated', delay: 560 },
+                    { type: 'warn', msg: 'Applying kernel patches...', delay: 660 },
+                    { type: 'ok', msg: '<b>Spoof completed</b> — system protected', delay: 480 },
+                ];
+
+                for (let i = 0; i < logs_to_use.length; i++) {
+                    await new Promise(r => setTimeout(r, logs_to_use[i].delay));
+                    addLog(logs_to_use[i]);
+                    progress.style.width = `${((i + 1) / logs_to_use.length) * 100}%`;
+                }
+                await new Promise(r => setTimeout(r, 500));
+            }
+
+            stackButtons.forEach(b => { b.classList.remove('loading'); b.disabled = false; });
+            clearBtn.disabled = false;
+            logStatus.textContent = 'completed';
+            running = false;
+            setTimeout(() => { progress.style.width = '0%'; }, 1200);
+        }
+
+        function clearLogs() {
+            if (running) return;
+            const activeLogs = document.querySelector('#tab-spoof #logs');
+            activeLogs.innerHTML = '';
+            const newEmpty = document.createElement('div');
+            newEmpty.className = 'empty';
+            newEmpty.id = 'empty';
+            newEmpty.innerHTML = `
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+      </div>
+      <span class="empty-text">No logs yet — initiate spoofing to begin</span>
+    `;
+            activeLogs.appendChild(newEmpty);
+            entries = 0;
+            logCount.textContent = '0 entries';
+            logStatus.textContent = 'idle';
+        }
+
+        clearBtn.addEventListener('click', clearLogs);
+
+        function addExtraLog(msg) {
+            const container = document.getElementById('extra-logs');
+            const emptyHint = container.querySelector('.empty');
+            if (emptyHint) emptyHint.remove();
+
+            const el = document.createElement('div');
+            el.className = 'log';
+            el.dataset.type = 'info';
+            el.innerHTML = `
+                <span class="log-time">${ts()}</span>
+                <span class="log-tag">Task</span>
+                <span class="log-msg">${msg}</span>
+            `;
+            container.appendChild(el);
+            container.scrollTop = container.scrollHeight;
+
+            // Sync with CMD
+            fetch(`/log?type=info&msg=${encodeURIComponent(msg)}`).catch(() => { });
+        }
+
+        // ── Drive picker ──────────────────────────────────────────────────────
+        let _selectedDrive = null;
+        let _driveConfirmResolve = null;
+
+        function formatBytes(b) {
+            if (!b) return '—';
+            const gb = b / 1e9;
+            return gb >= 1 ? gb.toFixed(1) + ' GB' : (b / 1e6).toFixed(0) + ' MB';
+        }
+
+        async function openDrivePicker() {
+            _selectedDrive = null;
+            const modal = document.getElementById('drive-modal');
+            const list = document.getElementById('drive-list');
+            const note = document.getElementById('drive-selected-note');
+            const btn = document.getElementById('drive-confirm-btn');
+
+            // Reset state
+            list.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:80px;color:var(--fg-4);font-size:12px;gap:10px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Scanning drives...</div>';
+            note.textContent = 'Aucun disque sélectionné.';
+            btn.disabled = true; btn.style.opacity = '0.4'; btn.style.cursor = 'not-allowed';
+            modal.classList.remove('hidden');
+
+            // Fetch drives
+            let drives = [];
+            try { drives = await fetch('/drives').then(r => r.json()); } catch { }
+
+            list.innerHTML = '';
+            if (!drives.length) {
+                list.innerHTML = '<div style="text-align:center;color:var(--fg-4);font-size:12px;padding:20px;">Aucun disque trouvé.</div>';
+                return;
+            }
+
+            drives.forEach(d => {
+                const free = formatBytes(d.free); const size = formatBytes(d.size);
+                const isRemovable = d.type === 'Removable';
+                const isCD = d.type === 'CD-ROM';
+
+                const iconHDD = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><rect x="2" y="7" width="20" height="10" rx="2.5"/><path d="M6 12h.01M9 12h.01"/><circle cx="17" cy="12" r="2" stroke-width="1.5"/></svg>`;
+                const iconUSB = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M12 2v13"/><path d="M9 5l3-3 3 3"/><path d="M7 15h10a2 2 0 0 1 0 4H7a2 2 0 0 1 0-4z"/><path d="M9 11h2M13 11h2"/></svg>`;
+                const iconCD = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/></svg>`;
+
+                const icon = isCD ? iconCD : isRemovable ? iconUSB : iconHDD;
+
+                const badgeColor = isRemovable
+                    ? 'background:rgba(74,222,128,0.1);color:#4ade80;border:1px solid rgba(74,222,128,0.2)'
+                    : isCD
+                        ? 'background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.2)'
+                        : 'background:rgba(125,211,252,0.1);color:#7dd3fc;border:1px solid rgba(125,211,252,0.2)';
+
+                const card = document.createElement('div');
+                card.className = 'drive-card';
+                card.dataset.letter = d.letter;
+                card.innerHTML = `
+                    <div class="drive-letter">${icon}</div>
+                    <div class="drive-info">
+                        <div class="drive-name">${d.label} <span style="color:var(--fg-3);font-weight:400">(${d.letter})</span></div>
+                        <div class="drive-meta">${free} free · ${size} total</div>
+                    </div>
+                    <span style="font-size:9.5px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:3px 8px;border-radius:4px;flex-shrink:0;${badgeColor}">${d.type || 'Local'}</span>
+                `;
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.drive-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    _selectedDrive = d.letter;
+                    note.textContent = `Disque sélectionné : ${d.letter} — ${d.label}`;
+                    btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
+                });
+                list.appendChild(card);
+            });
+
+            return new Promise(resolve => { _driveConfirmResolve = resolve; });
+        }
+
+        function closeDriveModal() {
+            document.getElementById('drive-modal').classList.add('hidden');
+            if (_driveConfirmResolve) { _driveConfirmResolve(null); _driveConfirmResolve = null; }
+        }
+
+        function confirmDrive() {
+            document.getElementById('drive-modal').classList.add('hidden');
+            if (_driveConfirmResolve) { _driveConfirmResolve(_selectedDrive); _driveConfirmResolve = null; }
+        }
+
+        // ── Critical System Logic (Heartbeat & Shutdown) ──────────────────────
+        window.addEventListener('pagehide', () => {
+            navigator.sendBeacon('/shutdown');
+        });
+
+        async function checkConnection() {
+            try {
+                const response = await fetch('/', { method: 'HEAD', cache: 'no-store' });
+                if (response.ok) { document.getElementById('overlay').classList.add('hidden'); }
+            } catch (e) { document.getElementById('overlay').classList.remove('hidden'); }
+        }
+        // ── System Info Polling ───────────────────────────────────────────────
+        async function pollSystemInfo() {
+            try {
+                const r = await fetch('/sysinfo');
+                if (!r.ok) return;
+                const data = await r.json();
+
+                const html = [];
+                const addCard = (title, icon, iconColor, fields, span = 1) => {
+                    html.push(`
+                        <div style="grid-column: span ${span}; background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-lg); padding:16px; transition:all 0.3s; position:relative; overflow:hidden;" onmouseover="this.style.borderColor='var(--line-2)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--line)'; this.style.transform='none'">
+                            <div style="position:absolute; top:0; right:0; width:150px; height:150px; background:radial-gradient(circle, ${iconColor}15 0%, transparent 70%); border-radius:50%; transform:translate(30%, -30%); pointer-events:none;"></div>
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+                                <div style="width:28px; height:28px; border-radius:6px; background:var(--surface-3); display:grid; place-items:center; color:${iconColor}; border:1px solid var(--line-2); font-size:13px;">
+                                    ${icon}
+                                </div>
+                                <div style="font-size:13px; font-weight:600; color:var(--fg); letter-spacing:0.02em;">${title}</div>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:10px;">
+                                ${fields.map(f => `
+                                    <div style="display:flex; flex-direction:column; gap:2px;">
+                                        <div style="font-size:10.5px; color:var(--fg-4); text-transform:uppercase; letter-spacing:0.05em;">${f.label}</div>
+                                        <div style="font-size:12px; font-family:'JetBrains Mono',monospace; color:var(--fg-2); word-break:break-all; line-height:1.4;">${f.val || 'N/A'}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `);
+                };
+
+                if (data.Motherboard) {
+                    addCard('Motherboard', '⚙️', '#3b82f6', [
+                        { label: 'Product', val: data.Motherboard.Product },
+                        { label: 'Manufacturer', val: data.Motherboard.Manufacturer },
+                        { label: 'Serial Number', val: data.Motherboard.SerialNumber }
+                    ]);
+                }
+
+                if (data.BIOS) {
+                    addCard('BIOS & CSProduct', '🔌', '#8b5cf6', [
+                        { label: 'Version', val: data.BIOS.Version },
+                        { label: 'Serial Number', val: data.BIOS.SerialNumber },
+                        { label: 'UUID', val: data.CSProduct?.UUID }
+                    ]);
+                }
+
+                if (data.CPU) {
+                    addCard('Processor', '🧠', '#ef4444', [
+                        { label: 'Name', val: data.CPU.Name },
+                        { label: 'Processor ID', val: data.CPU.ProcessorId },
+                        { label: 'Socket', val: data.CPU.SocketDesignation }
+                    ]);
+                }
+
+                if (data.RAM && data.RAM.length > 0) {
+                    const rams = Array.isArray(data.RAM) ? data.RAM : [data.RAM];
+                    rams.forEach((r, i) => {
+                        addCard(`Memory (RAM) ${i + 1}`, '⚡', '#10b981', [
+                            { label: 'Part Number', val: r.PartNumber },
+                            { label: 'Serial Number', val: r.SerialNumber }
+                        ]);
+                    });
+                }
+
+                if (data.MAC && data.MAC.length > 0) {
+                    const macs = Array.isArray(data.MAC) ? data.MAC : [data.MAC];
+                    macs.forEach((m, i) => {
+                        addCard(`Network Interface ${i + 1}`, '🌐', '#06b6d4', [
+                            { label: 'Description', val: m.Description || m.InterfaceDescription },
+                            { label: 'MAC Address', val: m.MACAddress }
+                        ]);
+                    });
+                }
+
+                if (data.PhysicalDisks && data.PhysicalDisks.length > 0) {
+                    const disks = Array.isArray(data.PhysicalDisks) ? data.PhysicalDisks : [data.PhysicalDisks];
+                    disks.forEach((d, i) => {
+                        addCard(`Storage Drive ${i + 1}`, '💾', '#f59e0b', [
+                            { label: 'Model', val: d.Model },
+                            { label: 'Serial Number', val: d.SerialNumber }
+                        ]);
+                    });
+                }
+
+                if (data.OS) {
+                    addCard('Operating System', '🔧', '#0ea5e9', [
+                        { label: 'Caption', val: data.OS.Caption },
+                        { label: 'Computer Name', val: data.OS.CSName },
+                        { label: 'Serial Number', val: data.OS.SerialNumber }
+                    ]);
+                }
+
+                if (data.TPM && data.TPM === 'Active') {
+                    addCard('TPM 2.0 Identity', '🛡️', '#eab308', [
+                        { label: 'Status', val: data.TPM },
+                        { label: 'Endorsement Key (SHA256)', val: data.TPMEK }
+                    ], 2);
+                }
+
+                window._lastSysData = data;
+                document.getElementById('save-serials-btn').disabled = false;
+
+                if (html.length > 0) {
+                    document.getElementById('hw-grid').innerHTML = html.join('');
+                }
+
+            } catch (e) {
+                console.error('Polling error', e);
+            }
+            setTimeout(pollSystemInfo, 5000);
+        }
+        pollSystemInfo();
+
+        function saveSerials() {
+            if (!window._lastSysData) return;
+            const d = window._lastSysData;
+            let txt = "=== TRINITY HARDWARE SERIALS ===\r\n\r\n";
+
+            if (d.Motherboard) {
+                txt += "[MOTHERBOARD]\r\n";
+                txt += `Product: ${d.Motherboard.Product || 'N/A'}\r\n`;
+                txt += `Manufacturer: ${d.Motherboard.Manufacturer || 'N/A'}\r\n`;
+                txt += `SerialNumber: ${d.Motherboard.SerialNumber || 'N/A'}\r\n\r\n`;
+            }
+            if (d.BIOS) {
+                txt += "[BIOS & CSPRODUCT]\r\n";
+                txt += `Version: ${d.BIOS.Version || 'N/A'}\r\n`;
+                txt += `Manufacturer: ${d.BIOS.Manufacturer || 'N/A'}\r\n`;
+                txt += `SerialNumber: ${d.BIOS.SerialNumber || 'N/A'}\r\n`;
+                if (d.CSProduct) txt += `UUID: ${d.CSProduct.UUID || 'N/A'}\r\n`;
+                txt += "\r\n";
+            }
+            if (d.CPU) {
+                txt += "[CPU]\r\n";
+                txt += `Name: ${d.CPU.Name || 'N/A'}\r\n`;
+                txt += `ProcessorId: ${d.CPU.ProcessorId || 'N/A'}\r\n`;
+                txt += `SocketDesignation: ${d.CPU.SocketDesignation || 'N/A'}\r\n\r\n`;
+            }
+            if (d.RAM && d.RAM.length > 0) {
+                txt += "[RAM]\r\n";
+                const rams = Array.isArray(d.RAM) ? d.RAM : [d.RAM];
+                rams.forEach((r, i) => {
+                    txt += `--- Module ${i + 1} ---\r\n`;
+                    txt += `PartNumber: ${r.PartNumber || 'N/A'}\r\n`;
+                    txt += `SerialNumber: ${r.SerialNumber || 'N/A'}\r\n`;
+                });
+                txt += "\r\n";
+            }
+            if (d.MAC && d.MAC.length > 0) {
+                txt += "[NETWORK INTERFACES]\r\n";
+                const macs = Array.isArray(d.MAC) ? d.MAC : [d.MAC];
+                macs.forEach((m, i) => {
+                    txt += `--- Interface ${i + 1} ---\r\n`;
+                    txt += `Description: ${m.Description || m.InterfaceDescription || 'N/A'}\r\n`;
+                    txt += `MACAddress: ${m.MACAddress || 'N/A'}\r\n`;
+                });
+                txt += "\r\n";
+            }
+            if (d.PhysicalDisks && d.PhysicalDisks.length > 0) {
+                txt += "[STORAGE DRIVES]\r\n";
+                const disks = Array.isArray(d.PhysicalDisks) ? d.PhysicalDisks : [d.PhysicalDisks];
+                disks.forEach((disk, i) => {
+                    txt += `--- Drive ${i + 1} ---\r\n`;
+                    txt += `Model: ${disk.Model || 'N/A'}\r\n`;
+                    txt += `SerialNumber: ${disk.SerialNumber || 'N/A'}\r\n`;
+                });
+                txt += "\r\n";
+            }
+            if (d.OS) {
+                txt += "[OPERATING SYSTEM]\r\n";
+                txt += `Caption: ${d.OS.Caption || 'N/A'}\r\n`;
+                txt += `ComputerName: ${d.OS.CSName || 'N/A'}\r\n`;
+                txt += `SerialNumber: ${d.OS.SerialNumber || 'N/A'}\r\n\r\n`;
+            }
+            if (d.TPM) {
+                txt += "[TPM & SECURE BOOT]\r\n";
+                txt += `SecureBoot: ${d.SecureBoot || 'N/A'}\r\n`;
+                txt += `TPM Status: ${d.TPM || 'N/A'}\r\n`;
+                if (d.TPMEK) txt += `TPM EK Hash: ${d.TPMEK}\r\n`;
+                txt += "\r\n";
+            }
+
+            const blob = new Blob([txt], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'serials.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showToast('success', 'Serials saved successfully as serials.txt');
+        }
+
+        setInterval(checkConnection, 2000);
+    </script>
+
+</body>
+
+</html>

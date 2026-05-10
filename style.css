@@ -1,0 +1,334 @@
+:root {
+    --bg-app: #0d0d0d;
+    --bg-panel: #121212;
+    --bg-sidebar: #0a0a0a;
+    --accent: #ffffff;
+    --text-main: #ffffff;
+    --text-dim: #888888;
+    --border: #1e1e1e;
+    --panel-border: rgba(255, 255, 255, 0.03);
+    --hover-bg: rgba(255, 255, 255, 0.05);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    background-color: #050505;
+    color: var(--text-main);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* App Container with Fade In */
+.app-container {
+    background: var(--bg-app);
+    width: 950px;
+    height: 600px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    display: flex;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.9);
+    animation: appEntrance 0.8s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes appEntrance {
+    from { opacity: 0; transform: scale(0.98) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Sidebar */
+.sidebar {
+    width: 80px;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 0;
+    gap: 1.2rem;
+    z-index: 10;
+}
+
+.nav-item {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+}
+
+.nav-item:hover {
+    color: var(--text-main);
+    background: var(--hover-bg);
+    transform: translateX(2px);
+}
+
+.nav-item.active {
+    background: var(--accent);
+    color: #000;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: -15px;
+    width: 4px;
+    height: 20px;
+    background: var(--accent);
+    border-radius: 0 4px 4px 0;
+}
+
+.nav-item.logout {
+    margin-top: auto;
+}
+
+/* Main Content */
+.content {
+    flex: 1;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.tab-header {
+    margin-bottom: 2.5rem;
+}
+
+.tab-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 0.3rem;
+}
+
+.tab-header p {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+}
+
+/* Panels */
+.main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 2rem;
+    flex: 1;
+}
+
+.panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 14px;
+    padding: 1.8rem;
+    display: flex;
+    flex-direction: column;
+    transition: var(--transition);
+}
+
+.panel:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.panel h3 {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+}
+
+/* Custom Checkbox */
+.operations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 0.5rem 0.8rem;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.checkbox-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.checkbox-item input {
+    display: none;
+}
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid #333;
+    border-radius: 6px;
+    display: inline-block;
+    position: relative;
+    transition: var(--transition);
+}
+
+.checkbox-item input:checked + .checkmark {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.checkbox-item input:checked + .checkmark::after {
+    content: "✓";
+    position: absolute;
+    color: #000;
+    font-size: 13px;
+    font-weight: 900;
+    left: 4px;
+    top: 0;
+}
+
+/* Terminal Console Area */
+.log-area {
+    background: #080808;
+    border-radius: 10px;
+    flex: 1;
+    padding: 1.2rem;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.85rem;
+    overflow-y: auto;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255,255,255,0.02);
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.log-line {
+    margin-bottom: 0.5rem;
+    color: #888;
+    line-height: 1.4;
+    animation: lineAppear 0.3s ease-out forwards;
+}
+
+@keyframes lineAppear {
+    from { opacity: 0; transform: translateX(-5px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Professional Execute Button */
+.btn-execute {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 1rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+.btn-execute:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(255, 255, 255, 0.1);
+}
+
+.btn-execute:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* Pulse animation for the button icon */
+.btn-execute svg {
+    transition: transform 0.3s ease;
+}
+
+.btn-execute:hover svg {
+    transform: rotate(90deg);
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Overlay Disconnect Style */
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.95);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.5s ease;
+}
+
+.overlay-content {
+    text-align: center;
+    padding: 3rem;
+    border: 1px solid rgba(255, 68, 68, 0.2);
+    border-radius: 24px;
+    background: rgba(255, 68, 68, 0.02);
+}
+
+.overlay-content h2 {
+    color: #ff4444;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #222;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #333;
+}
