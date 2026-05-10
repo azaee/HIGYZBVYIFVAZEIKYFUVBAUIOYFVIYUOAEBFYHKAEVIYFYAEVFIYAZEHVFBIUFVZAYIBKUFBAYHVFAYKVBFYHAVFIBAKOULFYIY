@@ -28,31 +28,55 @@ try {
 
 Write-Host '[+] Trinity Server is running...' -ForegroundColor Magenta
 
-$shutdownTimer = $null
+$exeHBPath      = "$env:TEMP\trinity_alive.flag"
+$lastBrowserHB  = Get-Date
+$startTime      = Get-Date
 
 while ($listener.IsListening) {
     try {
-        $context = $listener.GetContext()
+        # Async wait so we can check heartbeats between requests
+        $task = $listener.GetContextAsync()
+        while (-not $task.Wait(500)) {
+            if (-not $listener.IsListening) { break }
+
+            # CMD closed: exe heartbeat file too old or missing
+            if (Test-Path $exeHBPath) {
+                $age = ((Get-Date) - (Get-Item $exeHBPath).LastWriteTime).TotalSeconds
+                if ($age -gt 3) {
+                    Write-Host "`n [!] Host process lost. Shutting down." -ForegroundColor Red
+                    $listener.Stop(); break
+                }
+            } elseif ((Get-Date) -gt $startTime.AddSeconds(5)) {
+                Write-Host "`n [!] Host process not found. Shutting down." -ForegroundColor Red
+                $listener.Stop(); break
+            }
+
+            # Browser closed: no heartbeat for 6 seconds
+            if (((Get-Date) - $lastBrowserHB).TotalSeconds -gt 6) {
+                Write-Host "`n [!] Browser disconnected. Shutting down." -ForegroundColor Red
+                $listener.Stop(); break
+            }
+        }
+        if (-not $listener.IsListening) { break }
+        if ($task.IsFaulted -or $task.IsCanceled) { continue }
+
+        $context = $task.Result
         $request = $context.Request
         $response = $context.Response
         $path = $request.Url.LocalPath
 
-        if ($null -ne $shutdownTimer) {
-            $shutdownTimer.Stop()
-            $shutdownTimer.Dispose()
-            $shutdownTimer = $null
+        if ($path -eq '/heartbeat') {
+            $lastBrowserHB = Get-Date
+            $response.StatusCode = 200
+            $response.Close()
+            continue
         }
-        
+
         if ($path -eq '/shutdown') {
             $response.StatusCode = 200
             $response.Close()
-            # Increase timer to 10s to avoid race conditions on page refresh
-            $shutdownTimer = New-Object System.Timers.Timer(10000)
-            $shutdownTimer.AutoReset = $false
-            $action = { $listener.Stop() }
-            Register-ObjectEvent -InputObject $shutdownTimer -EventName Elapsed -Action $action | Out-Null
-            $shutdownTimer.Start()
-            continue
+            $listener.Stop()
+            break
         }
 
         if ($path -eq '/spoof/permanent') {
