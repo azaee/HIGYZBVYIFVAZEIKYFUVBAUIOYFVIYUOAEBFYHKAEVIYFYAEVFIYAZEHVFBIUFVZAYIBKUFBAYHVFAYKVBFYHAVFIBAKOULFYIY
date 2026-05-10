@@ -2000,16 +2000,32 @@
         }
 
         // ── Critical System Logic (Heartbeat & Shutdown) ──────────────────────
-        window.addEventListener('pagehide', () => {
-            navigator.sendBeacon('/shutdown');
-        });
-
+        let connectionFailures = 0;
         async function checkConnection() {
             try {
                 const response = await fetch('/', { method: 'HEAD', cache: 'no-store' });
-                if (response.ok) { document.getElementById('overlay').classList.add('hidden'); }
-            } catch (e) { document.getElementById('overlay').classList.remove('hidden'); }
+                if (response.ok) { 
+                    connectionFailures = 0;
+                    document.getElementById('overlay').classList.add('hidden'); 
+                } else {
+                    throw new Error('Server returned ' + response.status);
+                }
+            } catch (e) { 
+                connectionFailures++;
+                // Only show overlay after 3 consecutive failures (approx 6 seconds)
+                if (connectionFailures >= 3) {
+                    document.getElementById('overlay').classList.remove('hidden'); 
+                }
+            }
         }
+
+        window.addEventListener('pagehide', (event) => {
+            // Only send shutdown if the tab is truly being closed
+            if (event.persisted === false) {
+                navigator.sendBeacon('/shutdown');
+            }
+        });
+
         // ── System Info Polling ───────────────────────────────────────────────
         async function pollSystemInfo() {
             try {
