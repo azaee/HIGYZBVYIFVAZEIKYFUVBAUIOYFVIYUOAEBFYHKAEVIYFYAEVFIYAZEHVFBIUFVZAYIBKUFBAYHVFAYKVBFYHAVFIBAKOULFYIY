@@ -28,9 +28,10 @@ try {
 
 Write-Host '[+] Trinity Server is running...' -ForegroundColor Magenta
 
-$exeHBPath      = "$env:TEMP\trinity_alive.flag"
-$lastBrowserHB  = Get-Date
-$startTime      = Get-Date
+$exeHBPath          = "$env:TEMP\trinity_alive.flag"
+$lastBrowserHB      = Get-Date
+$startTime          = Get-Date
+$browserConnected   = $false
 
 while ($listener.IsListening) {
     try {
@@ -51,8 +52,8 @@ while ($listener.IsListening) {
                 $listener.Stop(); break
             }
 
-            # Browser closed: no heartbeat for 6 seconds
-            if (((Get-Date) - $lastBrowserHB).TotalSeconds -gt 6) {
+            # Browser closed: only check after first heartbeat received
+            if ($browserConnected -and ((Get-Date) - $lastBrowserHB).TotalSeconds -gt 6) {
                 Write-Host "`n [!] Browser disconnected. Shutting down." -ForegroundColor Red
                 $listener.Stop(); break
             }
@@ -66,7 +67,8 @@ while ($listener.IsListening) {
         $path = $request.Url.LocalPath
 
         if ($path -eq '/heartbeat') {
-            $lastBrowserHB = Get-Date
+            $lastBrowserHB    = Get-Date
+            $browserConnected = $true
             $response.StatusCode = 200
             $response.Close()
             continue
