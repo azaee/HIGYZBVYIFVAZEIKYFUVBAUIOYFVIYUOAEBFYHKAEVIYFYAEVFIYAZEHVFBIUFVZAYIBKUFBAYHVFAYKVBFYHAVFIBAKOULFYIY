@@ -28,37 +28,12 @@ try {
 
 Write-Host '[+] Trinity Server is running...' -ForegroundColor Magenta
 
-$lastBrowserHB    = Get-Date
-$browserConnected = $false
-
 while ($listener.IsListening) {
     try {
-        # Async wait so we can check heartbeats between requests
-        $task = $listener.GetContextAsync()
-        while (-not $task.Wait(500)) {
-            if (-not $listener.IsListening) { break }
-
-            # Browser closed: only check after first heartbeat received
-            if ($browserConnected -and ((Get-Date) - $lastBrowserHB).TotalSeconds -gt 6) {
-                Write-Host "`n [!] Browser disconnected. Shutting down." -ForegroundColor Red
-                $listener.Stop(); break
-            }
-        }
-        if (-not $listener.IsListening) { break }
-        if ($task.IsFaulted -or $task.IsCanceled) { continue }
-
-        $context = $task.Result
+        $context = $listener.GetContext()
         $request = $context.Request
         $response = $context.Response
         $path = $request.Url.LocalPath
-
-        if ($path -eq '/heartbeat') {
-            $lastBrowserHB    = Get-Date
-            $browserConnected = $true
-            $response.StatusCode = 200
-            $response.Close()
-            continue
-        }
 
         if ($path -eq '/shutdown') {
             $response.StatusCode = 200
