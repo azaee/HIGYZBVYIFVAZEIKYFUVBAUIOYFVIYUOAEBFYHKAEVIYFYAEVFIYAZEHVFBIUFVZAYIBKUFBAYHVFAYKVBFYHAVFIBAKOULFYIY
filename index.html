@@ -1709,8 +1709,6 @@
 
         window._currentLogTarget = 'spoof';
 
-        // ── Heartbeat: keeps server alive while tab is open ──────────────────────
-        setInterval(() => fetch('/heartbeat').catch(() => {}), 1500);
         window.addEventListener('beforeunload', () => {
             navigator.sendBeacon('/shutdown');
         });
