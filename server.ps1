@@ -11,7 +11,6 @@ $listener.Prefixes.Add("http://localhost:$port/")
 
 try {
     $listener.Start()
-    Start-Process 'http://localhost:8080'
 } catch {
     Write-Host 'CRITICAL ERROR: Could not start listener.' -ForegroundColor Red
     pause
